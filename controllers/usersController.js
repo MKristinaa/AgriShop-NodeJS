@@ -133,7 +133,7 @@ exports.resetPassword = async (req, res, next) => {
 
 //Get currently logged in user details
 exports.getUserProfile = async (req, res, next) => {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.params.id);
 
     res.status(200).json({
         success: true,
@@ -143,7 +143,7 @@ exports.getUserProfile = async (req, res, next) => {
 
 //Update password => /api/password/update
 exports.updatePassword = async (req, res, next) => {
-    const user = await User.findById(req.user.id).select('+password');
+    const user = await User.findById(req.body.id).select('+password');
 
     // Check previus user password 
     const isMatched = await user.comparePassword(req.body.oldPassword);
@@ -165,15 +165,16 @@ exports.updateProfile = async (req, res, next) => {
     try {
         const newUserData = {
             name: req.body.name,
-            email: req.body.email
+            email: req.body.email,
+            user: req.body.user
         };
 
         // Update avatar if a new one is provided
         if (req.body.avatar !== '') {
-            const user = await User.findById(req.user.id);
+            const user = await User.findById(req.body.user);
 
 
-        console.log("Updating user profile for user ID:", req.user.id);
+        console.log("Updating user profile for user ID:", req.body.user);
 
             const image_id = user.avatar.public_id;
             await cloudinary.v2.uploader.destroy(image_id);
@@ -191,7 +192,7 @@ exports.updateProfile = async (req, res, next) => {
         }
 
         // Update the user profile with the new data
-        const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+        const user = await User.findByIdAndUpdate(req.body.user, newUserData, {
             new: true,
             runValidators: true,
             useFindAndModify: false
