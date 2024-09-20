@@ -3,8 +3,6 @@ const router = express.Router();
 
 const { registerUser, loginUser, logout, forgotPassword, resetPassword , getUserProfile, updatePassword, updateProfile, allUsers, getUserDetails, updateUser, deleteUser } = require('../controllers/usersController')
 
-const { isAuthenticatedUser  } = require('../middlewares/auth')
-
 
 router.route('/register').post(registerUser);
 router.route('/login').post(loginUser);
@@ -19,9 +17,9 @@ router.route('/password/update').put(updatePassword);
 
 router.route('/me/update').put(updateProfile);
 
-router.route('/admin/users').get(isAuthenticatedUser, allUsers);
-router.route('/admin/user/:id').get(isAuthenticatedUser, getUserDetails);
-router.route('/admin/user/:id').put(isAuthenticatedUser, updateUser);
-router.route('/admin/user/:id').delete(isAuthenticatedUser, deleteUser);
+router.route('/admin/users').get(allUsers);
+router.route('/admin/user/:id').get(getUserDetails);
+router.route('/admin/user/:id').put(updateUser);
+router.route('/admin/user/:id').delete(deleteUser);
 
 module.exports = router;
