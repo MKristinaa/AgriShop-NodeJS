@@ -48,6 +48,11 @@ const productSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: 'User',
         required: true
+    },
+    stocks: {
+        type: Number,
+        required: [true, 'Please enter stock quantity'],
+        default: 0
     }
 })
 

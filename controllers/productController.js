@@ -4,41 +4,46 @@ const APIFeatures = require('../utils/apiFeatures')
 const cloudinary = require('cloudinary')
 
 
-// Create new product   =>   /api/v1/admin/product/new
 exports.newProduct = async (req, res, next) => {
+    try {
+        const result = await cloudinary.v2.uploader.upload(req.body.image, {
+            folder: 'products',
+            width: 150,
+            crop: 'scale'
+        });
 
-    const result = await cloudinary.v2.uploader.upload(req.body.image, {
-        folder: 'products',
-        width: 150,
-        crop: 'scale'
-    })
+        const { name, price, description, ratings, category, user, stocks } = req.body;
 
-    const { name, price, description, ratings, category, user}= req.body;
+        const product = await Product.create({
+            name,
+            price,
+            description,
+            ratings,
+            category,
+            user,
+            stocks,
+            image: {
+                public_id: result.public_id,
+                url: result.secure_url
+            }
+        });
+
+        res.status(201).json({
+            success: true,
+            product
+        });
+    } catch (error) {
+        console.error('Error:', JSON.stringify(error, null, 2)); // Detaljan ispis greške
+        next(error);
+    }
     
-    const product = await Product.create({
-        name,
-        price,
-        description,
-        ratings,
-        category,
-        user,
-        image:{
-            public_id: result.public_id,
-            url: result.secure_url
-        }
-    })
-
-    res.status(201).json({
-        success: true,
-        product
-    })
-}
+};
 
 
 // Get all products
 exports.getProducts = async (req, res, next) => {
     try {
-        const resPerPage = 5;
+        const resPerPage = 4;
         const productCount = await Product.countDocuments();
 
         // Kreiraj novi query objekat za pretragu i filtriranje
@@ -101,7 +106,8 @@ exports.updateProduct = async (req, res, next) => {
             price: req.body.price,
             description: req.body.description,
             category: req.body.category,
-            ratings: req.body.ratings
+            ratings: req.body.ratings,
+            stocks: req.body.stocks
         };
 
         // Ako postoji nova slika, ažuriraj sliku
