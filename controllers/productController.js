@@ -176,3 +176,25 @@ exports.deleteProduct = async (req, res, next) => {
         message: 'Product is deleted'
     })
 }
+
+
+// Get products by user ID => /api/v1/products/user/:userId
+exports.getProductByUserId = async (req, res, next) => {
+        const userId = req.params.userId;
+
+        // Pronađi sve proizvode koje je dodao korisnik sa zadatim userId
+        const products = await Product.find({ user: userId });
+
+        if (products.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No products found for this user'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            products
+        });
+
+};

@@ -12,12 +12,14 @@ exports.registerUser = async(req, res, next) => {
         width: 150,
         crop: 'scale'
     })
-    const { name, email, password }= req.body;
+    const { name, lastname, email, password, role }= req.body;
     
     const user = await User.create({
         name,
+        lastname,
         email,
         password,
+        role,
         avatar:{
             public_id: result.public_id,
             url: result.secure_url
@@ -165,6 +167,7 @@ exports.updateProfile = async (req, res, next) => {
     try {
         const newUserData = {
             name: req.body.name,
+            lastname: req.body.lastname,
             email: req.body.email,
             user: req.body.user
         };
@@ -252,6 +255,7 @@ exports.getUserDetails = async(req, res, next) => {
 exports.updateUser = async(req, res, next) => {
     const newUserData = {
         name: req.body.name,
+        lastname: req.body.lastname,
         email: req.body.email,
         role: req.body.role
     };
