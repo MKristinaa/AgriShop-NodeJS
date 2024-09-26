@@ -6,56 +6,205 @@ const cloudinary = require('cloudinary')
 const crypto = require('crypto')
 
 //register user
-exports.registerUser = async(req, res, next) => {
-    const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
-        folder: 'avatars',
-        width: 150,
-        crop: 'scale'
-    })
-    const { name, lastname, email, password, role }= req.body;
-    
-    const user = await User.create({
-        name,
-        lastname,
-        email,
-        password,
-        role,
-        avatar:{
-            public_id: result.public_id,
-            url: result.secure_url
-        }
-    })
+exports.registerUser = async (req, res, next) => {
+    try {
+        const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+            folder: 'avatars',
+            width: 150,
+            crop: 'scale'
+        });
 
-    sendToken(user, 200, res)
-}
+        const { name, lastname, email, password, role } = req.body;
 
-//Login user
-exports.loginUser = async(req, res, next) =>{
-    const {email, password} = req.body;
+        const user = await User.create({
+            name,
+            lastname,
+            email,
+            password,
+            role,
+            avatar: {
+                public_id: result.public_id,
+                url: result.secure_url
+            }
+        });
 
-    //check if email and password is entered by user
-    if(!email || !password){
-        return next('Please enter your email and password')
+        // Generiši verifikacioni token
+        const verificationToken = user.getVerificationToken();
+
+        // Sačuvaj korisnika sa verifikacionim tokenom
+        await user.save({ validateBeforeSave: false });
+
+        // Kreiraj verifikacioni URL
+        const verificationUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-email/${verificationToken}`;
+
+        // Kreiraj poruku
+        const message = `Hello ${name},\n\nPlease verify your email by clicking the following link: \n\n${verificationUrl}\n\nIf you did not request this, please ignore it.`;
+
+        // Pošalji email
+        await sendEmail({
+            email: user.email,
+            subject: 'Email Verification',
+            message
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Verification email sent to: ${user.email}`
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
+
+
+exports.verifyEmail = async (req, res, next) => {
+    const emailVerificationToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+    // Nađi korisnika pomoću tokena
+    const user = await User.findOne({
+        emailVerificationToken,
+        isVerified: false
+    });
+
+    if (!user) {
+        // HTML za neuspeh verifikacije emaila
+        const htmlResponse = `
+            <html>
+                <head>
+                    <title>Verification Failed</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background-color: #f4f4f9;
+                            text-align: center;
+                            padding: 50px;
+                        }
+                        .container {
+                            background-color: #fff;
+                            padding: 20px;
+                            border-radius: 8px;
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                            max-width: 500px;
+                            margin: auto;
+                        }
+                        h1 {
+                            color: #f44336;
+                        }
+                        p {
+                            color: #555;
+                        }
+                        a {
+                            color: #4CAF50;
+                            text-decoration: none;
+                            font-weight: bold;
+                        }
+                        a:hover {
+                            text-decoration: underline;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>Verification Failed</h1>
+                        <p>The verification token is invalid or has expired.</p>
+                    </div>
+                </body>
+            </html>
+        `;
+
+        // Pošalji HTML kao odgovor sa statusom 400 (Bad Request)
+        return res.status(400).send(htmlResponse);
     }
 
-    //finding user in database
-    const user = await User.findOne({email}).select('+password')
+    // Verifikuj email
+    user.isVerified = true;
+    user.emailVerificationToken = undefined;
 
-    if(!user){
-        return next('Email or password is not valid');
+    await user.save({ validateBeforeSave: false });
 
+    // HTML za uspešnu verifikaciju emaila
+    const htmlResponse = `
+        <html>
+            <head>
+                <title>Email Verified</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background-color: #f4f4f9;
+                        text-align: center;
+                        padding: 50px;
+                    }
+                    .container {
+                        background-color: #fff;
+                        padding: 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        max-width: 500px;
+                        margin: auto;
+                    }
+                    h1 {
+                        color: #4CAF50;
+                    }
+                    p {
+                        color: #555;
+                    }
+                    a {
+                        color: #4CAF50;
+                        text-decoration: none;
+                        font-weight: bold;
+                    }
+                    a:hover {
+                        text-decoration: underline;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Email Verified Successfully!</h1>
+                    <p>Your email has been verified. You can now <a href="http://localhost:3000/login">login to your account</a>.</p>
+                </div>
+            </body>
+        </html>
+    `;
+
+    // Pošalji HTML kao odgovor
+    res.status(200).send(htmlResponse);
+};
+
+
+
+
+
+// Login user
+exports.loginUser = async (req, res, next) => {
+    const { email, password } = req.body;
+
+    // Check if email and password are entered by user
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Please enter your email and password' });
     }
-    //check if password is correct or not
+
+    // Finding user in database
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user) {
+        return res.status(400).json({ message: 'Email or password is not valid' });
+    }
+
+    // Check if user is verified
+    if (!user.isVerified) {
+        return res.status(400).json({ message: 'Your account is not verified. Please verify your email before logging in.' });
+    }
+
+    // Check if password is correct or not
     const isPasswordMatched = await user.comparePassword(password);
-    
-    if(!isPasswordMatched){
-        return next('The code does not match')
 
+    if (!isPasswordMatched) {
+        return res.status(400).json({ message: 'The password does not match' });
     }
-    
-    sendToken(user, 200, res)
 
-}
+    sendToken(user, 200, res);
+};
 
 
 //Forgot password => /api/passwprd/forgot

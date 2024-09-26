@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router();
 
-const { registerUser, loginUser, logout, forgotPassword, resetPassword , getUserProfile, updatePassword, updateProfile, allUsers, getUserDetails, updateUser, deleteUser } = require('../controllers/usersController')
+const { registerUser, loginUser, logout, forgotPassword, resetPassword , getUserProfile, updatePassword, updateProfile, allUsers, getUserDetails, updateUser, deleteUser, verifyEmail } = require('../controllers/usersController')
 
 
 router.route('/register').post(registerUser);
@@ -21,5 +21,8 @@ router.route('/admin/users').get(allUsers);
 router.route('/admin/user/:id').get(getUserDetails);
 router.route('/admin/user/:id').put(updateUser);
 router.route('/admin/user/:id').delete(deleteUser);
+
+// Dodaj rutu za verifikaciju emaila
+router.route('/auth/verify-email/:token').get(verifyEmail);
 
 module.exports = router;
