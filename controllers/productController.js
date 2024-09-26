@@ -12,13 +12,12 @@ exports.newProduct = async (req, res, next) => {
             crop: 'scale'
         });
 
-        const { name, price, description, ratings, category, user, stocks } = req.body;
+        const { name, price, description,  category, user, stocks } = req.body;
 
         const product = await Product.create({
             name,
             price,
             description,
-            ratings,
             category,
             user,
             stocks,
@@ -98,15 +97,15 @@ exports.getSingleProduct = async (req, res, next) => {
 
 
 
+
 // Update product => /api/v1/product/:id
 exports.updateProduct = async (req, res, next) => {
     try {
         const newProductData = {
-            name: req.body.name,
+            name: req.body.name || "", // Default vrednost ako ime nije prosleđeno
             price: req.body.price,
             description: req.body.description,
             category: req.body.category,
-            ratings: req.body.ratings,
             stocks: req.body.stocks
         };
 
@@ -130,10 +129,10 @@ exports.updateProduct = async (req, res, next) => {
             });
 
             // Dodavanje nove slike u `newProductData`
-            newProductData.images = [{
+            newProductData.image = {
                 public_id: result.public_id,
                 url: result.secure_url
-            }];
+            };
         }
 
         // Ako nema nove slike, zadrži postojeću sliku
@@ -149,6 +148,8 @@ exports.updateProduct = async (req, res, next) => {
         });
 
     } catch (error) {
+        // Logovanje greške
+        console.error('Error:', JSON.stringify(error, null, 2)); // Detaljan ispis greške
         return next(error); // Prosljeđivanje greške middleware-u za rukovanje greškama
     }
 };

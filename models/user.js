@@ -52,7 +52,10 @@ const userSchema = new mongoose.Schema({
         ref: 'User'
     },
     resetPasswordToken: String, 
-    resetPasswordExpire: Date
+    resetPasswordExpire: Date,
+
+    emailVerificationToken: String, 
+    emailVerificationExpire: Date
 
 })
 

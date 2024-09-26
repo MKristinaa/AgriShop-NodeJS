@@ -17,10 +17,7 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please enter product description'],
     },
-    ratings: {
-        type: Number,
-        default: 0
-    },
+    
     image: {
             public_id:{
                 type: String,
