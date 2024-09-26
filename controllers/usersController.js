@@ -200,7 +200,7 @@ exports.loginUser = async (req, res, next) => {
     const isPasswordMatched = await user.comparePassword(password);
 
     if (!isPasswordMatched) {
-        return res.status(400).json({ message: 'The password does not match' });
+        return res.status(400).json({ message: 'Email or password is not valid' });
     }
 
     sendToken(user, 200, res);
