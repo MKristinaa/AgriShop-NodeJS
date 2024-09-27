@@ -292,22 +292,36 @@ exports.getUserProfile = async (req, res, next) => {
     })
 }
 
-//Update password => /api/password/update
+// Update password => /api/password/update
 exports.updatePassword = async (req, res, next) => {
-    const user = await User.findById(req.body.id).select('+password');
+    try {
+        // Proveri da li je novo polje lozinke popunjeno
+        if (!req.body.password) {
+            return res.status(400).json({ success: false, message: 'Please enter new password.' });
+        }
 
-    // Check previus user password 
-    const isMatched = await user.comparePassword(req.body.oldPassword);
-    if(!isMatched){
-        return next('Old password is incorect.')
+        const user = await User.findById(req.body.id).select('+password');
+
+        // Provera stare lozinke korisnika
+        const isMatched = await user.comparePassword(req.body.oldPassword);
+        if (!isMatched) {
+            return res.status(400).json({ success: false, message: 'Old password is incorrect.' });
+        }
+
+        // Ažuriraj lozinku
+        user.password = req.body.password;
+        await user.save();
+
+        // Slanje tokena korisniku kao odgovor
+        sendToken(user, 200, res);
+    } catch (error) {
+        // Uhvatiti sve greške i vratiti ih kao JSON odgovor
+        return res.status(500).json({ success: false, message: error.message });
     }
+};
 
-    user.password = req.body.password;
-    await user.save();
 
-    sendToken(user, 200, res);
 
-}
 
 
 

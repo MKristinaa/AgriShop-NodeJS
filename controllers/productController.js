@@ -32,7 +32,6 @@ exports.newProduct = async (req, res, next) => {
             product
         });
     } catch (error) {
-        console.error('Error:', JSON.stringify(error, null, 2)); // Detaljan ispis greške
         next(error);
     }
     
