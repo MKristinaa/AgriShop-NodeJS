@@ -4,6 +4,7 @@ const APIFeatures = require('../utils/apiFeatures')
 const cloudinary = require('cloudinary')
 
 
+// Add new project
 exports.newProduct = async (req, res, next) => {
     try {
         const result = await cloudinary.v2.uploader.upload(req.body.image, {
@@ -44,7 +45,6 @@ exports.getProducts = async (req, res, next) => {
         const resPerPage = 4;
         const productCount = await Product.countDocuments();
 
-        // Kreiraj novi query objekat za pretragu i filtriranje
         let apiFeatures = new APIFeatures(Product.find(), req.query)
             .search()
             .filter();
@@ -52,7 +52,6 @@ exports.getProducts = async (req, res, next) => {
         let products = await apiFeatures.query;
         let filteredProductsCount = products.length;
 
-        // Kreiraj novi query objekat za paginaciju
         apiFeatures = new APIFeatures(Product.find(), req.query)
             .search()
             .filter()
@@ -101,14 +100,13 @@ exports.getSingleProduct = async (req, res, next) => {
 exports.updateProduct = async (req, res, next) => {
     try {
         const newProductData = {
-            name: req.body.name || "", // Default vrednost ako ime nije prosleđeno
+            name: req.body.name || "", 
             price: req.body.price,
             description: req.body.description,
             category: req.body.category,
             stocks: req.body.stocks
         };
 
-        // Ako postoji nova slika, ažuriraj sliku
         if (req.body.image !== '') {
             const product = await Product.findById(req.params.id);
             
@@ -116,25 +114,21 @@ exports.updateProduct = async (req, res, next) => {
                 return next(new ErrorHandler('Product not found', 404));
             }
 
-            // Brisanje stare slike sa Cloudinary-a
             const image_id = product.image.public_id;
             await cloudinary.v2.uploader.destroy(image_id);
 
-            // Upload nove slike na Cloudinary
             const result = await cloudinary.v2.uploader.upload(req.body.image, {
                 folder: 'products',
                 width: 500,
                 crop: "scale"
             });
 
-            // Dodavanje nove slike u `newProductData`
             newProductData.image = {
                 public_id: result.public_id,
                 url: result.secure_url
             };
         }
 
-        // Ako nema nove slike, zadrži postojeću sliku
         const updatedProduct = await Product.findByIdAndUpdate(req.params.id, newProductData, {
             new: true,
             runValidators: true,
@@ -147,9 +141,8 @@ exports.updateProduct = async (req, res, next) => {
         });
 
     } catch (error) {
-        // Logovanje greške
-        console.error('Error:', JSON.stringify(error, null, 2)); // Detaljan ispis greške
-        return next(error); // Prosljeđivanje greške middleware-u za rukovanje greškama
+        console.error('Error:', JSON.stringify(error, null, 2)); 
+        return next(error); 
     }
 };
 

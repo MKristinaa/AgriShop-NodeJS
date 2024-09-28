@@ -4,14 +4,11 @@ const cloudinary = require('cloudinary')
 
 const dotenv = require('dotenv')
 
-// Setting up config file
 dotenv.config({ path: 'config/config.env'})
 
-// Connecting to database
 connectDatabase()
 
 
-//Setting up cloudinary configuration
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,

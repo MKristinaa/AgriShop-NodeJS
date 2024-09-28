@@ -28,19 +28,14 @@ exports.registerUser = async (req, res, next) => {
             }
         });
 
-        // Generiši verifikacioni token
         const verificationToken = user.getVerificationToken();
 
-        // Sačuvaj korisnika sa verifikacionim tokenom
         await user.save({ validateBeforeSave: false });
 
-        // Kreiraj verifikacioni URL
         const verificationUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-email/${verificationToken}`;
 
-        // Kreiraj poruku
         const message = `Hello ${name},\n\nPlease verify your email by clicking the following link: \n\n${verificationUrl}\n\nIf you did not request this, please ignore it.`;
 
-        // Pošalji email
         await sendEmail({
             email: user.email,
             subject: 'Email Verification',
@@ -60,14 +55,12 @@ exports.registerUser = async (req, res, next) => {
 exports.verifyEmail = async (req, res, next) => {
     const emailVerificationToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
 
-    // Nađi korisnika pomoću tokena
     const user = await User.findOne({
         emailVerificationToken,
         isVerified: false
     });
 
     if (!user) {
-        // HTML za neuspeh verifikacije emaila
         const htmlResponse = `
             <html>
                 <head>
@@ -112,17 +105,14 @@ exports.verifyEmail = async (req, res, next) => {
             </html>
         `;
 
-        // Pošalji HTML kao odgovor sa statusom 400 (Bad Request)
         return res.status(400).send(htmlResponse);
     }
 
-    // Verifikuj email
     user.isVerified = true;
     user.emailVerificationToken = undefined;
 
     await user.save({ validateBeforeSave: false });
 
-    // HTML za uspešnu verifikaciju emaila
     const htmlResponse = `
         <html>
             <head>
@@ -167,7 +157,6 @@ exports.verifyEmail = async (req, res, next) => {
         </html>
     `;
 
-    // Pošalji HTML kao odgovor
     res.status(200).send(htmlResponse);
 };
 
@@ -179,24 +168,20 @@ exports.verifyEmail = async (req, res, next) => {
 exports.loginUser = async (req, res, next) => {
     const { email, password } = req.body;
 
-    // Check if email and password are entered by user
     if (!email || !password) {
         return res.status(400).json({ message: 'Please enter your email and password' });
     }
 
-    // Finding user in database
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
         return res.status(400).json({ message: 'Email or password is not valid' });
     }
 
-    // Check if user is verified
     if (!user.isVerified) {
         return res.status(400).json({ message: 'Your account is not verified. Please verify your email before logging in.' });
     }
 
-    // Check if password is correct or not
     const isPasswordMatched = await user.comparePassword(password);
 
     if (!isPasswordMatched) {
@@ -216,12 +201,10 @@ exports.forgotPassword = async (req, res, next) => {
         return next('User not found with this email');
     }
 
-    //Get reset token
     const resetToken = user.getResetPasswordToken();
 
     await user.save({ validateBeforeSave: false })
 
-    // Create reset passwprd url
     const resetUrl = `${req.protocol}://${req.get('host')}/api/password/reset/${resetToken}`;
 
     const message = `Your password reset token is as follow: \n\n${resetUrl}\n\nIf you have not requested this email, then ignore it.`
@@ -254,7 +237,6 @@ exports.forgotPassword = async (req, res, next) => {
 //Reset password => /api/passwprd/reset/:token
 exports.resetPassword = async (req, res, next) => {
 
-    //Hash URL token
     const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex')
 
     const user = await User.findOne({
@@ -270,7 +252,6 @@ exports.resetPassword = async (req, res, next) => {
         return next('Password does not match')
     }
 
-    //Setup new password
     user.password = req.body.password;
 
     user.resetPasswordToken = undefined;
@@ -295,27 +276,22 @@ exports.getUserProfile = async (req, res, next) => {
 // Update password => /api/password/update
 exports.updatePassword = async (req, res, next) => {
     try {
-        // Proveri da li je novo polje lozinke popunjeno
         if (!req.body.password) {
             return res.status(400).json({ success: false, message: 'Please enter new password.' });
         }
 
         const user = await User.findById(req.body.id).select('+password');
 
-        // Provera stare lozinke korisnika
         const isMatched = await user.comparePassword(req.body.oldPassword);
         if (!isMatched) {
             return res.status(400).json({ success: false, message: 'Old password is incorrect.' });
         }
 
-        // Ažuriraj lozinku
         user.password = req.body.password;
         await user.save();
 
-        // Slanje tokena korisniku kao odgovor
         sendToken(user, 200, res);
     } catch (error) {
-        // Uhvatiti sve greške i vratiti ih kao JSON odgovor
         return res.status(500).json({ success: false, message: error.message });
     }
 };
@@ -335,7 +311,6 @@ exports.updateProfile = async (req, res, next) => {
             user: req.body.user
         };
 
-        // Update avatar if a new one is provided
         if (req.body.avatar !== '') {
             const user = await User.findById(req.body.user);
 
@@ -357,7 +332,6 @@ exports.updateProfile = async (req, res, next) => {
             };
         }
 
-        // Update the user profile with the new data
         const user = await User.findByIdAndUpdate(req.body.user, newUserData, {
             new: true,
             runValidators: true,
@@ -370,7 +344,7 @@ exports.updateProfile = async (req, res, next) => {
         });
 
     } catch (error) {
-        return next(error); // Pass error to error-handling middleware
+        return next(error); 
     }
 };
 
@@ -388,7 +362,6 @@ exports.logout = async(req, res, next) => {
     })
 }
 
-//Admin Routes
 
 //Get All Users => /api/users
 exports.allUsers = async(req, res, next) => {
@@ -423,10 +396,8 @@ exports.updateUser = async(req, res, next) => {
         role: req.body.role
     };
 
-    // Find the user by ID
     let user = await User.findById(req.params.id);
 
-    // If user not found, return error
     if (!user) {
         return res.status(404).json({
             success: false,
@@ -434,16 +405,15 @@ exports.updateUser = async(req, res, next) => {
         });
     }
 
-    // Update the user details
     user = await User.findByIdAndUpdate(req.params.id, newUserData, {
-        new: true, // Return the updated document
-        runValidators: true, // Run Mongoose schema validations
-        useFindAndModify: false // Disable deprecated use of findAndModify
+        new: true, 
+        runValidators: true,
+        useFindAndModify: false 
     });
 
     res.status(200).json({
         success: true,
-        user // Return updated user data
+        user 
     });
 }
 
@@ -458,8 +428,6 @@ exports.deleteUser = async (req, res, next) => {
             message: 'User does not found'
         })
     }
-
-    //Remove avatar 
 
     await User.findByIdAndDelete(req.params.id);
 
