@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: agri-shop
+    env: node
+    plan: free
+    buildCommand: 'npm install'
+    startCommand: 'npm start'
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DB_LOCAL_URI
+        value: 'mongodb+srv://kristinamilentijevic13:softversko@cluster0.pjq4h.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0'
+      - key: JWT_SECRET
+        value: 'FCGHJLKLHYTGRF'
+      - key: CLOUDINARY_CLOUD_NAME
+        value: 'dqubcd8sx'
+      - key: CLOUDINARY_API_KEY
+        value: '188491293233866'
+      - key: CLOUDINARY_API_SECRET
+        value: 'l8Z2XHfDzCPYXyG9VOlOAR4TI5c'
+      - key: SMTP_HOST
+        value: 'smtp.gmail.com'
+      - key: SMTP_PORT
+        value: '587'
+      - key: SMTP_EMAIL
+        value: 'recepti.hci@gmail.com'
+      - key: SMTP_PASSWORD
+        value: 'okfi zzvg dodx olzd'
