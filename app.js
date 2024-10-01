@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
 app.use(cors({
-    origin: 'http://localhost:3000',  
+    origin: 'https://agrishop-react.onrender.com',  
     credentials: true 
 }));
 app.use(express.json());
