@@ -85,5 +85,6 @@ describe('Login User', () => {
     expect(response.status).toBe(400);  
     expect(response.body).toHaveProperty('message', 'Your account is not verified. Please verify your email before logging in.');
   });
+
   
 });
