@@ -24,11 +24,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Show Node.js version
-        run: node -v
+      - name: Set execute permissions for jest
+        run: chmod +x ./node_modules/.bin/jest
 
       - name: Run backend tests
         run: npm test --verbose
 
-      - name: Set up environment variables
-        run: echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
+      - name: List installed npm packages
+        run: npm list
