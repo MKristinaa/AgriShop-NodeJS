@@ -5,13 +5,15 @@
   "scripts": {
     "start": "node server.js",
     "dev": "SET NODE_ENV=DEVELOPMENT& nodemon server",
-    "prod": "SET NODE_ENV=PRODUCTION& nodemon server"
+    "prod": "SET NODE_ENV=PRODUCTION& nodemon server",
+    "test": "jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "cloudinary": "^2.4.0",
@@ -26,6 +28,13 @@
     "validator": "^13.12.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.4",
+    "nodemon": "^3.1.4",
+    "supertest": "^7.1.0"
+  },
+  "jest": {
+    "testTimeout": 10000, 
+    "testEnvironment": "node" 
   }
 }
