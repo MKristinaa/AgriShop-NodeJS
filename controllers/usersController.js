@@ -6,6 +6,53 @@ const cloudinary = require('cloudinary')
 const crypto = require('crypto')
 
 //register user
+// exports.registerUser = async (req, res, next) => {
+//     try {
+//         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+//             folder: 'avatars',
+//             width: 150,
+//             crop: 'scale'
+//         });
+
+//         const { name, lastname, email, password, role } = req.body;
+
+//         const user = await User.create({
+//             name,
+//             lastname,
+//             email,
+//             password,
+//             role,
+//             avatar: {
+//                 public_id: result.public_id,
+//                 url: result.secure_url
+//             }
+//         });
+
+//         const verificationToken = user.getVerificationToken();
+
+//         await user.save({ validateBeforeSave: false });
+
+//         const verificationUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-email/${verificationToken}`;
+
+//         const message = `Hello ${name},\n\nPlease verify your email by clicking the following link: \n\n${verificationUrl}\n\nIf you did not request this, please ignore it.`;
+
+//         await sendEmail({
+//             email: user.email,
+//             subject: 'Email Verification',
+//             message
+//         });
+
+//         res.status(200).json({
+//             success: true,
+//             message: `Verification email sent to: ${user.email}`
+//         });
+//     } catch (error) {
+//         return next(error);
+//     }
+// };
+
+
+//register user
 exports.registerUser = async (req, res, next) => {
     try {
         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
@@ -28,6 +75,9 @@ exports.registerUser = async (req, res, next) => {
             }
         });
 
+        // ---------------------------------------------
+        // Deo za verifikaciju mejla zakomentarisan
+        /*
         const verificationToken = user.getVerificationToken();
 
         await user.save({ validateBeforeSave: false });
@@ -46,10 +96,20 @@ exports.registerUser = async (req, res, next) => {
             success: true,
             message: `Verification email sent to: ${user.email}`
         });
+        */
+        // ---------------------------------------------
+
+        res.status(201).json({
+            success: true,
+            user,
+            message: "User registered successfully and verified."
+        });
+
     } catch (error) {
         return next(error);
     }
 };
+
 
 
 exports.verifyEmail = async (req, res, next) => {
