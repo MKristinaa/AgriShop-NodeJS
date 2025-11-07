@@ -45,14 +45,14 @@ exports.getProducts = async (req, res, next) => {
         const resPerPage = 4;
         const productCount = await Product.countDocuments();
 
-        let apiFeatures = new APIFeatures(Product.find(), req.query)
+        let apiFeatures = new APIFeatures(Product.find().sort({ createdAt: -1 }), req.query)
             .search()
             .filter();
 
         let products = await apiFeatures.query;
         let filteredProductsCount = products.length;
 
-        apiFeatures = new APIFeatures(Product.find(), req.query)
+        apiFeatures = new APIFeatures(Product.find().sort({ createdAt: -1 }), req.query)
             .search()
             .filter()
             .pagination(resPerPage);
@@ -74,6 +74,7 @@ exports.getProducts = async (req, res, next) => {
         });
     }
 };
+
 
 
 //Get Single Product
