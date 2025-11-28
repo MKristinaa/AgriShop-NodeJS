@@ -1,0 +1,7 @@
+2025-11-28 17:06:06 [[31merror[39m]: E11000 duplicate key error collection: shop.users index: email_1 dup key: { email: "kristina.milentijevic13@gmail.com" } - POST /api/register - ::1
+2025-11-28 17:31:35 [[31merror[39m]: E11000 duplicate key error collection: shop.users index: email_1 dup key: { email: "kristina.milentijevic13@gmail.com" } - POST /api/register - ::1
+2025-11-28 17:32:53 [[31merror[39m]: User validation failed: password: Please enter youre password - POST /api/register - ::1
+2025-11-28 17:35:20 [[31merror[39m]: E11000 duplicate key error collection: shop.users index: email_1 dup key: { email: "kristina.milentijevic13@gmail.com" } - POST /api/register - ::1
+2025-11-28 17:40:12 [[31merror[39m]: E11000 duplicate key error collection: shop.users index: email_1 dup key: { email: "kristina.milentijevic13@gmail.com" } - POST /api/register - ::1
+2025-11-28 17:44:45 [[31merror[39m]: E11000 duplicate key error collection: shop.users index: email_1 dup key: { email: "kristina.milentijevic13@gmail.com" } - POST /api/register - ::1
+2025-11-28 17:45:35 [[31merror[39m]: E11000 duplicate key error collection: shop.users index: email_1 dup key: { email: "kristina.milentijevic13@gmail.com" } - POST /api/register - ::1

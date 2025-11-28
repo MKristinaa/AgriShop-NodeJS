@@ -29,18 +29,25 @@ const productSchema = new mongoose.Schema({
             }
     },
     category: {
-        
         type: String,
         required: [true, 'Please enter category for this product'],
         enum: {
             values: [
                 'Vegetables',
                 'Fruits',
-                'Grains'
+                'Grains',
+                'Dairy Products',
+                'Meat & Poultry',
+                'Honey & Beekeeping Products',
+                'Herbs & Spices',
+                'Nuts & Seeds',
+                'Beverages',
+                'Others'
             ],
-            message:'Please select correst category for products'
+            message: 'Please select correct category for products'
         }
     },
+
     user: {
         type: mongoose.Schema.ObjectId,
         ref: 'User',

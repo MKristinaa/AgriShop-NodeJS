@@ -7,85 +7,61 @@ const crypto = require('crypto')
 
 //register user
 exports.registerUser = async (req, res, next) => {
-    try {
-        const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
-            folder: 'avatars',
-            width: 150,
-            crop: 'scale'
-        });
+  try {
+    const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      folder: 'avatars',
+      width: 150,
+      crop: 'scale'
+    });
 
-        const { name, lastname, email, password, role } = req.body;
+    const { name, lastname, email, password, role } = req.body;
 
-        const user = await User.create({
-            name,
-            lastname,
-            email,
-            password,
-            role,
-            avatar: {
-                public_id: result.public_id,
-                url: result.secure_url
-            }
-        });
+    const user = await User.create({
+      name,
+      lastname,
+      email,
+      password,
+      role,
+      avatar: {
+        public_id: result.public_id,
+        url: result.secure_url
+      }
+    });
 
-        const verificationToken = user.getVerificationToken();
+    const verificationToken = user.getVerificationToken();
+    await user.save({ validateBeforeSave: false });
 
-        await user.save({ validateBeforeSave: false });
+    const verificationUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-email/${verificationToken}`;
 
-        const verificationUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-email/${verificationToken}`;
+    const message = `Hello ${name},\n\nPlease verify your email by clicking the following link:\n\n${verificationUrl}\n\nIf you did not request this, please ignore it.`;
 
-        const message = `Hello ${name},\n\nPlease verify your email by clicking the following link: \n\n${verificationUrl}\n\nIf you did not request this, please ignore it.`;
+    await sendEmail({
+      email: user.email,
+      subject: 'Email Verification',
+      message
+    });
 
-        await sendEmail({
-            email: user.email,
-            subject: 'Email Verification',
-            message
-        });
-
-        res.status(200).json({
-            success: true,
-            message: `Verification email sent to: ${user.email}`
-        });
-    } catch (error) {
-        return next(error);
+    res.status(200).json({
+      success: true,
+      message: `Verification email sent! Please verify your account to activate it.`
+    });
+  } catch (error) {
+    // 🧩 Provera da li je duplikat email adrese
+    if (error.code === 11000 && error.keyValue && error.keyValue.email) {
+      return res.status(400).json({
+        success: false,
+        message: 'This email is already registered. Please use a different one or log in.'
+      });
     }
+
+    // ostale greške
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong. Please try again later.'
+    });
+  }
 };
-
-
-//register user
-// exports.registerUser = async (req, res, next) => {
-//     try {
-//         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
-//             folder: 'avatars',
-//             width: 150,
-//             crop: 'scale'
-//         });
-
-//         const { name, lastname, email, password, role } = req.body;
-
-//         const user = await User.create({
-//             name,
-//             lastname,
-//             email,
-//             password,
-//             role,
-//             avatar: {
-//                 public_id: result.public_id,
-//                 url: result.secure_url
-//             }
-//         });
-
-
-//         res.status(201).json({
-//             success: true,
-//             user,
-//             message: "User registered successfully and verified."
-//         });
-
-//     } catch (error) {
-//         return next(error);
-//     }
-// };
 
 
 
