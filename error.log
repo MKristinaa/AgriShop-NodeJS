@@ -20,3 +20,5 @@
 2025-12-01 01:01:31 [[31merror[39m]: Cast to ObjectId failed for value "new" (type string) at path "_id" for model "Product" - GET /api/product/new - ::1
 2025-12-01 01:07:31 [[31merror[39m]: Cast to ObjectId failed for value "new" (type string) at path "_id" for model "Product" - GET /api/product/new - ::1
 2025-12-01 01:08:43 [[31merror[39m]: Cast to ObjectId failed for value "new" (type string) at path "_id" for model "Product" - GET /api/product/new - ::1
+2025-12-01 16:15:32 [[31merror[39m]: request entity too large - POST /api/register - ::1
+2025-12-01 16:27:30 [[31merror[39m]: request entity too large - POST /api/register - ::1

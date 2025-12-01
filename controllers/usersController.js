@@ -1,52 +1,68 @@
-const User = require('../models/user')
-const sendToken = require('../utils/jwtToken')
-const sendEmail = require('../utils/sendEmail')
-const cloudinary = require('cloudinary')
+const User = require('../models/user');
+const sendToken = require('../utils/jwtToken');
+const sendEmail = require('../utils/sendEmail');
+const cloudinary = require('cloudinary');
+const multer = require('multer');
+const streamifier = require('streamifier');
+const crypto = require('crypto');
 
-const crypto = require('crypto')
+// Multer memory storage za direktan upload na Cloudinary
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-//register user
+// Middleware za upload avatara (jedan fajl, polje 'avatar')
+exports.uploadAvatar = upload.single('avatar');
+
+// Register user
 exports.registerUser = async (req, res, next) => {
   try {
-    const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
-      folder: 'avatars',
-      width: 150,
-      crop: 'scale'
-    });
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Avatar is required' });
+    }
 
-    const { name, lastname, email, password, role } = req.body;
+    // Upload avatara na Cloudinary
+    const uploadStream = cloudinary.v2.uploader.upload_stream(
+      { folder: 'avatars', width: 150, crop: 'scale' },
+      async (error, result) => {
+        if (error) return next(error);
 
-    const user = await User.create({
-      name,
-      lastname,
-      email,
-      password,
-      role,
-      avatar: {
-        public_id: result.public_id,
-        url: result.secure_url
+        const { name, lastname, email, password, role } = req.body;
+
+        const user = await User.create({
+          name,
+          lastname,
+          email,
+          password,
+          role,
+          avatar: {
+            public_id: result.public_id,
+            url: result.secure_url
+          }
+        });
+
+        const verificationToken = user.getVerificationToken();
+        await user.save({ validateBeforeSave: false });
+
+        const verificationUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-email/${verificationToken}`;
+
+        const message = `Hello ${name},\n\nPlease verify your email by clicking the following link:\n\n${verificationUrl}\n\nIf you did not request this, please ignore it.`;
+
+        await sendEmail({
+          email: user.email,
+          subject: 'Email Verification',
+          message
+        });
+
+        res.status(201).json({
+          success: true,
+          message: 'Verification email sent! Please verify your account to activate it.'
+        });
       }
-    });
+    );
 
-    const verificationToken = user.getVerificationToken();
-    await user.save({ validateBeforeSave: false });
+    streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
 
-    const verificationUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-email/${verificationToken}`;
-
-    const message = `Hello ${name},\n\nPlease verify your email by clicking the following link:\n\n${verificationUrl}\n\nIf you did not request this, please ignore it.`;
-
-    await sendEmail({
-      email: user.email,
-      subject: 'Email Verification',
-      message
-    });
-
-    res.status(200).json({
-      success: true,
-      message: `Verification email sent! Please verify your account to activate it.`
-    });
   } catch (error) {
-    // 🧩 Provera da li je duplikat email adrese
     if (error.code === 11000 && error.keyValue && error.keyValue.email) {
       return res.status(400).json({
         success: false,
@@ -54,7 +70,6 @@ exports.registerUser = async (req, res, next) => {
       });
     }
 
-    // ostale greške
     console.error(error);
     return res.status(500).json({
       success: false,
