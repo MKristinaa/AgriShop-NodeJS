@@ -14,3 +14,9 @@
 2025-11-29 15:00:00 [[31merror[39m]: undefined - GET /api/admin/user/690d3bcaeb67dcb93557ffab - ::1
 2025-11-29 15:00:00 [[31merror[39m]: undefined - GET /api/admin/user/690d3bcaeb67dcb93557ffab - ::1
 2025-11-29 16:06:04 [[31merror[39m]: undefined - GET /api/admin/user/690d38a97e55986ea06b95c4 - ::1
+2025-12-01 00:53:43 [[31merror[39m]: Unexpected end of form - POST /api/product/new - ::1
+2025-12-01 00:57:49 [[31merror[39m]: Unexpected end of form - POST /api/product/new - ::1
+2025-12-01 00:58:19 [[31merror[39m]: Unexpected end of form - POST /api/product/new - ::1
+2025-12-01 01:01:31 [[31merror[39m]: Cast to ObjectId failed for value "new" (type string) at path "_id" for model "Product" - GET /api/product/new - ::1
+2025-12-01 01:07:31 [[31merror[39m]: Cast to ObjectId failed for value "new" (type string) at path "_id" for model "Product" - GET /api/product/new - ::1
+2025-12-01 01:08:43 [[31merror[39m]: Cast to ObjectId failed for value "new" (type string) at path "_id" for model "Product" - GET /api/product/new - ::1

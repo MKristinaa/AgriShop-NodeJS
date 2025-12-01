@@ -19,7 +19,7 @@
 //     console.log(`Server started on PORT: ${process.env.PORT} in ${process.env.NODE_ENV} mode.`)
 // })
 
-const app = require('./app'); // Tvoja Express aplikacija
+const app = require('./app'); 
 const connectDatabase = require('./config/database');
 const cloudinary = require('cloudinary');
 const dotenv = require('dotenv');
@@ -44,4 +44,4 @@ if (process.env.NODE_ENV !== 'test') {
     });
 }
 
-module.exports = app;  // Eksportuj aplikaciju za testiranje
+module.exports = app;  

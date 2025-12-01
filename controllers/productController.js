@@ -1,43 +1,56 @@
-const Product = require('../models/product')
-
-const APIFeatures = require('../utils/apiFeatures')
+const Product = require('../models/product');
+const APIFeatures = require('../utils/apiFeatures');
 const cloudinary = require('cloudinary')
+const multer = require('multer');
+const streamifier = require('streamifier');
 
+// Multer storage - koristi memory storage za direktan upload na Cloudinary
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-// Add new project
+// Middleware za upload fajla (jedan fajl, polje "image")
+exports.uploadProductImage = upload.single('image');
+
+// Add new product
 exports.newProduct = async (req, res, next) => {
     try {
-        const result = await cloudinary.v2.uploader.upload(req.body.image, {
-            folder: 'products',
-            width: 150,
-            crop: 'scale'
-        });
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Image is required' });
+        }
 
-        const { name, price, description,  category, user, stocks } = req.body;
+        const uploadStream = cloudinary.v2.uploader.upload_stream(
+            { folder: 'products' },
+            async (error, result) => {
+                if (error) return next(error);
 
-        const product = await Product.create({
-            name,
-            price,
-            description,
-            category,
-            user,
-            stocks,
-            image: {
-                public_id: result.public_id,
-                url: result.secure_url
+                const { name, price, description, category, user, stocks } = req.body;
+
+                const product = await Product.create({
+                    name,
+                    price,
+                    description,
+                    category,
+                    user,
+                    stocks,
+                    image: {
+                        public_id: result.public_id,
+                        url: result.secure_url
+                    }
+                });
+
+                res.status(201).json({
+                    success: true,
+                    product
+                });
             }
-        });
+        );
 
-        res.status(201).json({
-            success: true,
-            product
-        });
+        streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+
     } catch (error) {
         next(error);
     }
-    
 };
-
 
 // Get all products
 exports.getProducts = async (req, res, next) => {
@@ -45,17 +58,24 @@ exports.getProducts = async (req, res, next) => {
         const resPerPage = 8;
         const productCount = await Product.countDocuments();
 
-        let apiFeatures = new APIFeatures(Product.find().sort({ createdAt: -1 }), req.query)
+        // 1. Prvo query sa search i filter
+        let apiFeatures = new APIFeatures(Product.find(), req.query)
             .search()
             .filter();
+
+        // 2. Dodaj sortiranje po poslednje dodatim
+        apiFeatures.query = apiFeatures.query.sort({ createdAt: -1 });
 
         let products = await apiFeatures.query;
         let filteredProductsCount = products.length;
 
-        apiFeatures = new APIFeatures(Product.find().sort({ createdAt: -1 }), req.query)
+        // 3. Pagination takođe mora da koristi sortirani query
+        apiFeatures = new APIFeatures(Product.find(), req.query)
             .search()
             .filter()
             .pagination(resPerPage);
+
+        apiFeatures.query = apiFeatures.query.sort({ createdAt: -1 }); // opet sort
 
         products = await apiFeatures.query;
 
@@ -75,109 +95,124 @@ exports.getProducts = async (req, res, next) => {
     }
 };
 
-
-
-//Get Single Product
+// Get single product
 exports.getSingleProduct = async (req, res, next) => {
-    const product = await Product.findById(req.params.id);
+    try {
+        const product = await Product.findById(req.params.id);
 
-    if(!product) {
-        return res.status(404).json({
-            success: false, 
-            message: 'Producct not found'
-        })
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: 'Product not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            product
+        });
+    } catch (error) {
+        next(error);
     }
+};
 
-    res.status(200).json({
-        success: true,
-        product
-    })
-}
-
-
-
-
-// Update product => /api/v1/product/:id
+// Update product
 exports.updateProduct = async (req, res, next) => {
     try {
         const newProductData = {
-            name: req.body.name || "", 
+            name: req.body.name || "",
             price: req.body.price,
             description: req.body.description,
             category: req.body.category,
             stocks: req.body.stocks
         };
 
-        if (req.body.image !== '') {
+        if (req.file) {
             const product = await Product.findById(req.params.id);
-            
+
             if (!product) {
-                return next(new ErrorHandler('Product not found', 404));
+                return next({ message: 'Product not found', statusCode: 404 });
             }
 
-            const image_id = product.image.public_id;
-            await cloudinary.v2.uploader.destroy(image_id);
+            // Briše staru sliku
+            await cloudinary.v2.uploader.destroy(product.image.public_id);
 
-            const result = await cloudinary.v2.uploader.upload(req.body.image, {
-                folder: 'products',
-                width: 500,
-                crop: "scale"
+            // Upload nove slike
+            const uploadStream = cloudinary.v2.uploader.upload_stream(
+                { folder: 'products' },
+                async (error, result) => {
+                    if (error) return next(error);
+
+                    newProductData.image = {
+                        public_id: result.public_id,
+                        url: result.secure_url
+                    };
+
+                    const updatedProduct = await Product.findByIdAndUpdate(
+                        req.params.id,
+                        newProductData,
+                        { new: true, runValidators: true, useFindAndModify: false }
+                    );
+
+                    res.status(200).json({
+                        success: true,
+                        product: updatedProduct
+                    });
+                }
+            );
+
+            streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+        } else {
+            // Ako nema nove slike, update samo ostala polja
+            const updatedProduct = await Product.findByIdAndUpdate(
+                req.params.id,
+                newProductData,
+                { new: true, runValidators: true, useFindAndModify: false }
+            );
+
+            res.status(200).json({
+                success: true,
+                product: updatedProduct
             });
-
-            newProductData.image = {
-                public_id: result.public_id,
-                url: result.secure_url
-            };
         }
-
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, newProductData, {
-            new: true,
-            runValidators: true,
-            useFindAndModify: false
-        });
-
-        res.status(200).json({
-            success: true,
-            product: updatedProduct
-        });
-
     } catch (error) {
-        console.error('Error:', JSON.stringify(error, null, 2)); 
-        return next(error); 
+        next(error);
     }
 };
 
-
-
-
-
-//Delete Product 
+// Delete product
 exports.deleteProduct = async (req, res, next) => {
+    try {
+        const product = await Product.findById(req.params.id);
 
-    const product = await Product.findById(req.params.id);
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: 'Product not found'
+            });
+        }
 
-    if(!product) {
-        return res.status(404).json({
-            success: false, 
-            message: 'Producct not found'
-        })
+        // Briše sliku sa Cloudinary
+        await cloudinary.v2.uploader.destroy(product.image.public_id);
+
+        await Product.findByIdAndDelete(req.params.id);
+
+        res.status(200).json({
+            success: true,
+            message: 'Product is deleted'
+        });
+    } catch (error) {
+        next(error);
     }
+};
 
-    await Product.findByIdAndDelete(req.params.id);
-
-    res.status(200).json({
-        success: true, 
-        message: 'Product is deleted'
-    })
-}
-
-
-// Get products by user ID => /api/v1/products/user/:userId
+// Get products by user ID
 exports.getProductByUserId = async (req, res, next) => {
+    try {
         const userId = req.params.userId;
 
-        // Pronađi sve proizvode koje je dodao korisnik sa zadatim userId
-        const products = await Product.find({ user: userId });
+        // Pronađi proizvode ovog korisnika i sortiraj po createdAt opadajuće
+        const products = await Product.find({ user: userId }).sort({ createdAt: -1 });
 
         if (products.length === 0) {
             return res.status(404).json({
@@ -190,5 +225,7 @@ exports.getProductByUserId = async (req, res, next) => {
             success: true,
             products
         });
-
+    } catch (error) {
+        next(error);
+    }
 };

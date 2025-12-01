@@ -19,14 +19,14 @@ const productSchema = new mongoose.Schema({
     },
     
     image: {
-            public_id:{
-                type: String,
-                required: true
-            },
-            url:{
-                type: String,
-                required: true
-            }
+        public_id:{
+            type: String,
+            required: true
+        },
+        url:{
+            type: String,
+            required: true
+        }
     },
     category: {
         type: String,
@@ -58,9 +58,8 @@ const productSchema = new mongoose.Schema({
         required: [true, 'Please enter stock quantity'],
         default: 0
     }
-})
+}, { timestamps: true }) 
 
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;
-
