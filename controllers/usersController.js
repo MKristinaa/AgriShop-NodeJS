@@ -6,11 +6,9 @@ const multer = require('multer');
 const streamifier = require('streamifier');
 const crypto = require('crypto');
 
-// Multer memory storage za direktan upload na Cloudinary
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Middleware za upload avatara (jedan fajl, polje 'avatar')
 exports.uploadAvatar = upload.single('avatar');
 
 // Register user
@@ -20,7 +18,6 @@ exports.registerUser = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Avatar is required' });
     }
 
-    // Upload avatara na Cloudinary
     const uploadStream = cloudinary.v2.uploader.upload_stream(
       { folder: 'avatars', width: 150, crop: 'scale' },
       async (error, result) => {

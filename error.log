@@ -22,3 +22,37 @@
 2025-12-01 01:08:43 [[31merror[39m]: Cast to ObjectId failed for value "new" (type string) at path "_id" for model "Product" - GET /api/product/new - ::1
 2025-12-01 16:15:32 [[31merror[39m]: request entity too large - POST /api/register - ::1
 2025-12-01 16:27:30 [[31merror[39m]: request entity too large - POST /api/register - ::1
+2025-12-01 19:48:27 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 19:48:27 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 19:52:49 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 19:52:49 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 19:54:22 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 19:54:22 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 19:57:46 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 19:57:46 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:08:18 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:08:18 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:15:35 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:22:28 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:23:12 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:26:38 [[31merror[39m]: undefined - GET /api/admin/user/692cc85ed8dc4853efd52c55 - ::1
+2025-12-01 20:26:38 [[31merror[39m]: undefined - GET /api/admin/user/692cc85ed8dc4853efd52c55 - ::1
+2025-12-01 20:27:03 [[31merror[39m]: undefined - GET /api/admin/user/692cc85ed8dc4853efd52c55 - ::1
+2025-12-01 20:27:03 [[31merror[39m]: undefined - GET /api/admin/user/692cc85ed8dc4853efd52c55 - ::1
+2025-12-01 20:29:33 [[31merror[39m]: undefined - GET /api/admin/user/692cc85ed8dc4853efd52c55 - ::1
+2025-12-01 20:31:10 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:31:10 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:32:05 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:32:25 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:32:47 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:33:25 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-01 20:34:13 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-03 18:54:42 [[31merror[39m]: Cannot read properties of null (reading 'avatar') - PUT /api/me/update - ::1
+2025-12-03 19:14:56 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-03 19:14:56 [[31merror[39m]: undefined - GET /api/admin/user/690d3acaeb67dcb93557ff9b - ::1
+2025-12-03 19:15:00 [[31merror[39m]: undefined - GET /api/admin/user/692cc85ed8dc4853efd52c55 - ::1
+2025-12-03 19:15:00 [[31merror[39m]: undefined - GET /api/admin/user/692cc85ed8dc4853efd52c55 - ::1
+2025-12-03 19:15:15 [[31merror[39m]: undefined - GET /api/admin/user/692cc85ed8dc4853efd52c55 - ::1
+2025-12-03 19:15:15 [[31merror[39m]: undefined - GET /api/admin/user/692cc85ed8dc4853efd52c55 - ::1
+2025-12-03 19:15:58 [[31merror[39m]: undefined - GET /api/admin/user/692db6f7578e982d08d73ecc - ::1
+2025-12-03 19:15:58 [[31merror[39m]: undefined - GET /api/admin/user/692db6f7578e982d08d73ecc - ::1

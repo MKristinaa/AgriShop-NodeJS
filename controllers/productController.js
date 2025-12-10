@@ -4,11 +4,9 @@ const cloudinary = require('cloudinary')
 const multer = require('multer');
 const streamifier = require('streamifier');
 
-// Multer storage - koristi memory storage za direktan upload na Cloudinary
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Middleware za upload fajla (jedan fajl, polje "image")
 exports.uploadProductImage = upload.single('image');
 
 // Add new product
@@ -58,24 +56,21 @@ exports.getProducts = async (req, res, next) => {
         const resPerPage = 8;
         const productCount = await Product.countDocuments();
 
-        // 1. Prvo query sa search i filter
         let apiFeatures = new APIFeatures(Product.find(), req.query)
             .search()
             .filter();
 
-        // 2. Dodaj sortiranje po poslednje dodatim
         apiFeatures.query = apiFeatures.query.sort({ createdAt: -1 });
 
         let products = await apiFeatures.query;
         let filteredProductsCount = products.length;
 
-        // 3. Pagination takođe mora da koristi sortirani query
         apiFeatures = new APIFeatures(Product.find(), req.query)
             .search()
             .filter()
             .pagination(resPerPage);
 
-        apiFeatures.query = apiFeatures.query.sort({ createdAt: -1 }); // opet sort
+        apiFeatures.query = apiFeatures.query.sort({ createdAt: -1 });
 
         products = await apiFeatures.query;
 
@@ -134,10 +129,8 @@ exports.updateProduct = async (req, res, next) => {
                 return next({ message: 'Product not found', statusCode: 404 });
             }
 
-            // Briše staru sliku
             await cloudinary.v2.uploader.destroy(product.image.public_id);
 
-            // Upload nove slike
             const uploadStream = cloudinary.v2.uploader.upload_stream(
                 { folder: 'products' },
                 async (error, result) => {
@@ -163,7 +156,6 @@ exports.updateProduct = async (req, res, next) => {
 
             streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
         } else {
-            // Ako nema nove slike, update samo ostala polja
             const updatedProduct = await Product.findByIdAndUpdate(
                 req.params.id,
                 newProductData,
@@ -192,7 +184,6 @@ exports.deleteProduct = async (req, res, next) => {
             });
         }
 
-        // Briše sliku sa Cloudinary
         await cloudinary.v2.uploader.destroy(product.image.public_id);
 
         await Product.findByIdAndDelete(req.params.id);
@@ -211,7 +202,6 @@ exports.getProductByUserId = async (req, res, next) => {
     try {
         const userId = req.params.userId;
 
-        // Pronađi proizvode ovog korisnika i sortiraj po createdAt opadajuće
         const products = await Product.find({ user: userId }).sort({ createdAt: -1 });
 
         if (products.length === 0) {
